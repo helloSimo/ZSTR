@@ -19,9 +19,9 @@ class DensePooler(EncoderPooler):
 
     def forward(self, q: Tensor = None, p: Tensor = None, **kwargs):
         if q is not None:
-            return self.linear_q(q[:, 0])
+            return self.linear_q(q)
         elif p is not None:
-            return self.linear_p(p[:, 0])
+            return self.linear_p(p)
         else:
             raise ValueError
 
@@ -31,22 +31,32 @@ class DenseModel(EncoderModel):
         if psg is None:
             return None
         psg_out = self.lm_p(**psg, return_dict=True)
-        p_hidden = psg_out.last_hidden_state
+        if "last_hidden_state" in psg_out:
+            p_hidden = psg_out.last_hidden_state[:, 0]
+        elif "pooler_output" in psg_out:
+            p_hidden = psg_out.pooler_output
+        else:
+            raise ValueError
         if self.pooler is not None:
             p_reps = self.pooler(p=p_hidden)  # D * d
         else:
-            p_reps = p_hidden[:, 0]
+            p_reps = p_hidden
         return p_reps
 
     def encode_query(self, qry):
         if qry is None:
             return None
         qry_out = self.lm_q(**qry, return_dict=True)
-        q_hidden = qry_out.last_hidden_state
+        if "last_hidden_state" in qry_out:
+            q_hidden = qry_out.last_hidden_state[:, 0]
+        elif "pooler_output" in qry_out:
+            q_hidden = qry_out.pooler_output
+        else:
+            raise ValueError
         if self.pooler is not None:
             q_reps = self.pooler(q=q_hidden)
         else:
-            q_reps = q_hidden[:, 0]
+            q_reps = q_hidden
         return q_reps
 
     def compute_similarity(self, q_reps, p_reps):
