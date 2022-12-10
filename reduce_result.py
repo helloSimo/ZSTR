@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from tqdm import tqdm
 from typing import Iterable, Tuple
 from numpy import ndarray
-from .__main__ import pickle_load, write_ranking
+from retrieve import pickle_load, write_ranking
 
 
 def combine_faiss_results(results: Iterable[Tuple[ndarray, ndarray]]):

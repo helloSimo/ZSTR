@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 from itertools import chain
 from tqdm import tqdm
 
-from .retriever import BaseFaissIPRetriever
+from tevatron.faiss_retriever.retriever import BaseFaissIPRetriever
 
 import logging
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ def main():
     parser.add_argument('--query_reps', required=True)
     parser.add_argument('--passage_reps', required=True)
     parser.add_argument('--batch_size', type=int, default=128)
-    parser.add_argument('--depth', type=int, default=1000)
+    parser.add_argument('--depth', type=int, default=100)
     parser.add_argument('--save_ranking_to', required=True)
     parser.add_argument('--save_text', action='store_true')
     parser.add_argument('--quiet', action='store_true')
