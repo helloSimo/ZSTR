@@ -1,5 +1,5 @@
 import pickle
-
+import csv
 import numpy as np
 import glob
 from argparse import ArgumentParser
@@ -30,11 +30,12 @@ def search_queries(retriever, q_reps, p_lookup, args):
 
 def write_ranking(corpus_indices, corpus_scores, q_lookup, ranking_save_file):
     with open(ranking_save_file, 'w') as f:
+        f = csv.writer(f, delimiter='\t')
         for qid, q_doc_scores, q_doc_indices in zip(q_lookup, corpus_scores, corpus_indices):
             score_list = [(s, idx) for s, idx in zip(q_doc_scores, q_doc_indices)]
             score_list = sorted(score_list, key=lambda x: x[0], reverse=True)
             for s, idx in score_list:
-                f.write(f'{qid}\t{idx}\t{s}\n')
+                f.writerow([qid, idx, s])
 
 
 def pickle_load(path):
