@@ -2,7 +2,9 @@ import os
 import jsonlines
 import argparse
 from transformers import AutoTokenizer
-from ..table_utils.table_processor import get_processor
+import sys
+sys.path.append('..')
+from table_utils.table_processor import get_processor
 
 
 def process_corpus(dataset, max_cell_length, delimiter, tokenizer_name_or_path):
@@ -34,9 +36,6 @@ def process_query(dataset):
 
 
 def main(args):
-    if not os.path.exists(args.output_dir):
-        os.mkdir(args.output_dir)
-
     process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.tokenizer_name_or_path)
     process_query(args.dataset)
 
