@@ -1,6 +1,3 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
-
 from typing import Dict, List
 from .table_linearize import TableLinearize, BasicTableLinearize, IndexedRowTableLinearize
 from .table_truncate import TableTruncate, CellLimitTruncate, RowRandomTruncate, RowChooseTruncate

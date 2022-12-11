@@ -1,6 +1,3 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
-
 """
 Utils for linearizing the table content into a flatted sequence
 """
