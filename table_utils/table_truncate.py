@@ -36,6 +36,10 @@ class CellLimitTruncate(TableTruncate):
         self.max_cell_length = max_cell_length
 
     def truncate_table(self, table_content: Dict):
+        for i, cell in enumerate(table_content["header"]):
+            truncate_cell = self.truncate_cell(cell)
+            if truncate_cell is not None:
+                table_content["header"][i] = truncate_cell
         for row in table_content["rows"]:
             for i, cell in enumerate(row):
                 truncate_cell = self.truncate_cell(cell)
@@ -47,8 +51,9 @@ class CellLimitTruncate(TableTruncate):
             try_tokens = self.tokenizer.tokenize(cell_value)
             if len(try_tokens) >= self.max_cell_length:
                 retain_tokens = try_tokens[:self.max_cell_length]
-                retain_cell_value = self.tokenizer.convert_tokens_to_string(retain_tokens)
-                return retain_cell_value
+                return self.tokenizer.convert_tokens_to_string(retain_tokens)
+            else:
+                return self.tokenizer.convert_tokens_to_string(try_tokens)
         return None
 
 
