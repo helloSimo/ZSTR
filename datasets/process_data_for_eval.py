@@ -16,7 +16,7 @@ def process_corpus(dataset, max_cell_length, delimiter, tokenizer_name_or_path):
                               index_row=delimiter,
                               row_choose=True)
 
-    dest_f = jsonlines.open('corpus.jsonl', 'w')
+    dest_f = jsonlines.open(os.path.join('eval', 'corpus.jsonl'), 'w')
     for table in jsonlines.open(os.path.join(dataset, 'tables.jsonl')):
         dest_f.write({
             'docid': table['id'],
@@ -27,7 +27,7 @@ def process_corpus(dataset, max_cell_length, delimiter, tokenizer_name_or_path):
 
 def process_query(dataset):
     for split in ['train', 'dev', 'test']:
-        dest_f = jsonlines.open(f'{split}.jsonl', 'w')
+        dest_f = jsonlines.open(os.path.join('eval', f'{split}.jsonl'), 'w')
         for qa in jsonlines.open(os.path.join(dataset, f'{split}.jsonl')):
             dest_f.write({
                 'query_id': qa['id'],
@@ -36,6 +36,9 @@ def process_query(dataset):
 
 
 def main(args):
+    if not os.path.exists('eval'):
+        os.mkdir('eval')
+
     process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.tokenizer_name_or_path)
     process_query(args.dataset)
 
