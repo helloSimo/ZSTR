@@ -8,7 +8,7 @@ from transformers import PreTrainedTokenizer, BatchEncoding, DataCollatorWithPad
 
 
 from .arguments import DataArguments
-from .train import TevatronTrainer
+from .trainer import TevatronTrainer
 
 import logging
 logger = logging.getLogger(__name__)
