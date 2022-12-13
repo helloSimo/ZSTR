@@ -41,11 +41,10 @@ def main():
     qrel = get_qrel(args.label_path)
     run = get_run(args.rank_path)
 
-    top_k = [1, 5, 10, 20, 50, 100]
+    top_k = [1, 10, 50]
     measure = ['map']
-    measure.extend([f'success_{k}' for k in top_k])
     measure.extend([f'recall_{k}' for k in top_k])
-    measure.extend([f'ndcg_cut_{k}' for k in top_k])
+    measure.append('ndcg_cut_10')
 
     evaluator = pytrec_eval.RelevanceEvaluator(qrel, measure)
 
