@@ -57,7 +57,7 @@ class TevatronTrainer(Trainer):
             num_workers=self.args.dataloader_num_workers,
         )
 
-    def compute_loss(self, model, inputs):
+    def compute_loss(self, model, inputs, return_outputs=False):
         query, passage = inputs
         return model(query=query, passage=passage).loss
 
