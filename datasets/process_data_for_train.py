@@ -44,7 +44,7 @@ def main(args):
     ids = list(corpus.keys())
 
     print("building data...")
-    for split in ['train', 'dev', 'test']:
+    for split in ['train', 'dev']:
         dest_f = jsonlines.open(os.path.join('train', f'{split}.jsonl'), 'w')
         for qa in tqdm(jsonlines.open(os.path.join(args.dataset, f'{split}.jsonl'))):
             positive_passages = []
