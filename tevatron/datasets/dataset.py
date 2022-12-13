@@ -23,7 +23,8 @@ class HFTrainDataset:
             data_files = {data_args.dataset_split: data_files}
         self.dataset = load_dataset(data_args.dataset_name,
                                     data_args.dataset_language,
-                                    data_files=data_files, cache_dir=cache_dir, use_auth_token=True)[data_args.dataset_split]
+                                    data_files=data_files, cache_dir=cache_dir,
+                                    use_auth_token=True)[data_args.dataset_split]
         self.preprocessor = PROCESSOR_INFO[data_args.dataset_name][0] if data_args.dataset_name in PROCESSOR_INFO\
             else DEFAULT_PROCESSORS[0]
         self.tokenizer = tokenizer
@@ -53,7 +54,8 @@ class HFQueryDataset:
             data_files = {data_args.dataset_split: data_files}
         self.dataset = load_dataset(data_args.dataset_name,
                                     data_args.dataset_language,
-                                    data_files=data_files, cache_dir=cache_dir, use_auth_token=True)[data_args.dataset_split]
+                                    data_files=data_files, cache_dir=cache_dir,
+                                    use_auth_token=True)[data_args.dataset_split]
         self.preprocessor = PROCESSOR_INFO[data_args.dataset_name][1] if data_args.dataset_name in PROCESSOR_INFO \
             else DEFAULT_PROCESSORS[1]
         self.tokenizer = tokenizer
@@ -80,7 +82,8 @@ class HFCorpusDataset:
             data_files = {data_args.dataset_split: data_files}
         self.dataset = load_dataset(data_args.dataset_name,
                                     data_args.dataset_language,
-                                    data_files=data_files, cache_dir=cache_dir, use_auth_token=True)[data_args.dataset_split]
+                                    data_files=data_files, cache_dir=cache_dir,
+                                    use_auth_token=True)[data_args.dataset_split]
         script_prefix = data_args.dataset_name
         if script_prefix.endswith('-corpus'):
             script_prefix = script_prefix[:-7]
@@ -92,7 +95,7 @@ class HFCorpusDataset:
         self.separator = getattr(self.tokenizer, data_args.passage_field_separator, data_args.passage_field_separator)
 
     def process(self, shard_num=1, shard_idx=0):
-        self.dataSset = self.dataset.shard(shard_num, shard_idx)
+        self.dataset = self.dataset.shard(shard_num, shard_idx)
         if self.preprocessor is not None:
             self.dataset = self.dataset.map(
                 self.preprocessor(self.tokenizer, self.p_max_len, self.separator),
