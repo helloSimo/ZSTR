@@ -25,13 +25,12 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
 
 
 def process_query(dataset):
-    for split in ['train', 'dev', 'test']:
-        dest_f = jsonlines.open(os.path.join('eval', f'{split}.jsonl'), 'w')
-        for qa in jsonlines.open(os.path.join(dataset, f'{split}.jsonl')):
-            dest_f.write({
-                'query_id': qa['id'],
-                'query': qa['question']
-            })
+    dest_f = jsonlines.open(os.path.join('eval', 'test.jsonl'), 'w')
+    for qa in jsonlines.open(os.path.join(dataset, 'test.jsonl')):
+        dest_f.write({
+            'query_id': qa['id'],
+            'query': qa['question']
+        })
 
 
 def main(args):
