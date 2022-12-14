@@ -9,6 +9,11 @@ class ModelArguments:
     model_name_or_path: str = field(
         metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
     )
+    additional_model_name: str = field(
+        default=None,
+        metadata={"help": "If untie encoder and from huggingface.co/models, model identifier for passage encoder. "
+                          "None for same model."}
+    )
     target_model_path: str = field(
         default=None,
         metadata={"help": "Path to pretrained reranker target model"}

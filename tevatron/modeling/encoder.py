@@ -145,7 +145,7 @@ class EncoderModel(nn.Module):
         return all_tensors
 
     @classmethod
-    def build(
+    def build_for_train(
             cls,
             model_args: ModelArguments,
             train_args: TrainingArguments,
@@ -174,8 +174,15 @@ class EncoderModel(nn.Module):
                 lm_p = lm_q
         # load pre-trained
         else:
-            lm_q = cls.TRANSFORMER_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
-            lm_p = copy.deepcopy(lm_q) if model_args.untie_encoder else lm_q
+            if model_args.untie_encoder:
+                lm_q = cls.TRANSFORMER_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
+                if model_args.additional_model_name is None:
+                    lm_p = copy.deepcopy(lm_q)
+                else:
+                    lm_p = cls.TRANSFORMER_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
+            else:
+                lm_q = cls.TRANSFORMER_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
+                lm_p = lm_q
 
         if model_args.add_pooler:
             pooler = cls.build_pooler(model_args)
@@ -192,39 +199,40 @@ class EncoderModel(nn.Module):
         return model
 
     @classmethod
-    def load(
+    def load_for_encode(
             cls,
             model_name_or_path,
+            encode_is_qry,
             **hf_kwargs,
     ):
-        # load local
-        untie_encoder = True
-        if os.path.isdir(model_name_or_path):
-            _qry_model_path = os.path.join(model_name_or_path, 'query_model')
-            _psg_model_path = os.path.join(model_name_or_path, 'passage_model')
-            if os.path.exists(_qry_model_path):
-                logger.info(f'found separate weight for query/passage encoders')
+        lm_q = None
+        lm_p = None
+        _qry_model_path = os.path.join(model_name_or_path, 'query_model')
+        _psg_model_path = os.path.join(model_name_or_path, 'passage_model')
+        # separate weight
+        if os.path.isdir(model_name_or_path) and os.path.exists(_qry_model_path):
+            logger.info(f'found separate weight for query/passage encoders')
+            if encode_is_qry:
                 logger.info(f'loading query model weight from {_qry_model_path}')
                 lm_q = cls.TRANSFORMER_CLS.from_pretrained(
                     _qry_model_path,
                     **hf_kwargs
                 )
+            else:
                 logger.info(f'loading passage model weight from {_psg_model_path}')
                 lm_p = cls.TRANSFORMER_CLS.from_pretrained(
                     _psg_model_path,
                     **hf_kwargs
                 )
-                untie_encoder = False
-            else:
-                logger.info(f'try loading tied weight')
-                logger.info(f'loading model weight from {model_name_or_path}')
-                lm_q = cls.TRANSFORMER_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
-                lm_p = lm_q
+        # tied weight
+        # from name or path
         else:
             logger.info(f'try loading tied weight')
             logger.info(f'loading model weight from {model_name_or_path}')
-            lm_q = cls.TRANSFORMER_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
-            lm_p = lm_q
+            if encode_is_qry:
+                lm_q = cls.TRANSFORMER_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
+            else:
+                lm_p = cls.TRANSFORMER_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
 
         pooler_weights = os.path.join(model_name_or_path, 'pooler.pt')
         pooler_config = os.path.join(model_name_or_path, 'pooler_config.json')
@@ -236,11 +244,12 @@ class EncoderModel(nn.Module):
         else:
             pooler = None
 
+        # lm_q or lm_p
         model = cls(
             lm_q=lm_q,
             lm_p=lm_p,
             pooler=pooler,
-            untie_encoder=untie_encoder
+            untie_encoder=False
         )
         return model
 

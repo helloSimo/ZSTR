@@ -52,8 +52,9 @@ def main():
         cache_dir=model_args.cache_dir
     )
 
-    model = DenseModel.load(
+    model = DenseModel.load_for_encode(
         model_name_or_path=model_args.model_name_or_path,
+        encode_is_qry=data_args.encode_is_qry,
         config=config,
         cache_dir=model_args.cache_dir,
     )

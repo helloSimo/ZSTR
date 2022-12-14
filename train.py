@@ -66,7 +66,7 @@ def main():
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
         cache_dir=model_args.cache_dir
     )
-    model = DenseModel.build(
+    model = DenseModel.build_for_train(
         model_args,
         training_args,
         config=config,
