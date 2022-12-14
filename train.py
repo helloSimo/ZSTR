@@ -15,7 +15,7 @@ from tevatron.arguments import ModelArguments, DataArguments, \
 from tevatron.data import TrainDataset, QPCollator
 from tevatron.modeling import DenseModel
 from tevatron.trainer import TevatronTrainer as Trainer, GCTrainer
-from tevatron.datasets import HFTrainDataset
+from tevatron.datasets import HFTrainDevDataset
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +73,15 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    train_dataset = HFTrainDataset(tokenizer=tokenizer, data_args=data_args,
-                                   cache_dir=data_args.data_cache_dir or model_args.cache_dir)
+    train_dataset = HFTrainDevDataset(tokenizer=tokenizer, data_args=data_args, is_train=True,
+                                      cache_dir=data_args.data_cache_dir or model_args.cache_dir)
+    dev_dataset = HFTrainDevDataset(tokenizer=tokenizer, data_args=data_args, is_train=False,
+                                    cache_dir=data_args.data_cache_dir or model_args.cache_dir)
     if training_args.local_rank > 0:
         print("Waiting for main process to perform the mapping")
         torch.distributed.barrier()
     train_dataset = TrainDataset(data_args, train_dataset.process(), tokenizer)
+    dev_dataset = TrainDataset(data_args, dev_dataset.process(), tokenizer)
     if training_args.local_rank == 0:
         print("Loading results from main process")
         torch.distributed.barrier()
@@ -88,6 +91,7 @@ def main():
         model=model,
         args=training_args,
         train_dataset=train_dataset,
+        eval_dataset=dev_dataset,
         data_collator=QPCollator(
             tokenizer,
             max_p_len=data_args.p_max_len,

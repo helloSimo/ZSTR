@@ -16,15 +16,16 @@ PROCESSOR_INFO = {
 }
 
 
-class HFTrainDataset:
-    def __init__(self, tokenizer: PreTrainedTokenizer, data_args: DataArguments, cache_dir: str):
-        data_files = data_args.train_path
-        if data_files:
-            data_files = {data_args.dataset_split: data_files}
+class HFTrainDevDataset:
+    def __init__(self, tokenizer: PreTrainedTokenizer, data_args: DataArguments, is_train: bool, cache_dir: str):
+        if is_train:
+            dataset_split = 'train'
+        else:
+            dataset_split = 'dev'
         self.dataset = load_dataset(data_args.dataset_name,
                                     data_args.dataset_language,
-                                    data_files=data_files, cache_dir=cache_dir,
-                                    use_auth_token=True)[data_args.dataset_split]
+                                    data_files=data_args.train_path, cache_dir=cache_dir,
+                                    use_auth_token=True)[dataset_split]
         self.preprocessor = PROCESSOR_INFO[data_args.dataset_name][0] if data_args.dataset_name in PROCESSOR_INFO\
             else DEFAULT_PROCESSORS[0]
         self.tokenizer = tokenizer
@@ -51,11 +52,11 @@ class HFQueryDataset:
     def __init__(self, tokenizer: PreTrainedTokenizer, data_args: DataArguments, cache_dir: str):
         data_files = data_args.encode_in_path
         if data_files:
-            data_files = {data_args.dataset_split: data_files}
+            data_files = {'train': data_files}
         self.dataset = load_dataset(data_args.dataset_name,
                                     data_args.dataset_language,
                                     data_files=data_files, cache_dir=cache_dir,
-                                    use_auth_token=True)[data_args.dataset_split]
+                                    use_auth_token=True)['train']
         self.preprocessor = PROCESSOR_INFO[data_args.dataset_name][1] if data_args.dataset_name in PROCESSOR_INFO \
             else DEFAULT_PROCESSORS[1]
         self.tokenizer = tokenizer
@@ -79,11 +80,11 @@ class HFCorpusDataset:
     def __init__(self, tokenizer: PreTrainedTokenizer, data_args: DataArguments, cache_dir: str):
         data_files = data_args.encode_in_path
         if data_files:
-            data_files = {data_args.dataset_split: data_files}
+            data_files = {'train': data_files}
         self.dataset = load_dataset(data_args.dataset_name,
                                     data_args.dataset_language,
                                     data_files=data_files, cache_dir=cache_dir,
-                                    use_auth_token=True)[data_args.dataset_split]
+                                    use_auth_token=True)['train']
         script_prefix = data_args.dataset_name
         if script_prefix.endswith('-corpus'):
             script_prefix = script_prefix[:-7]

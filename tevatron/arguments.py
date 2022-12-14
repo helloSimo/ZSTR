@@ -92,29 +92,26 @@ class DataArguments:
     )
 
     def __post_init__(self):
+        # ToDo: Include validation data
         if self.dataset_name is not None:
             info = self.dataset_name.split('/')
-            self.dataset_split = info[-1] if len(info) == 3 else 'train'
             self.dataset_name = "/".join(info[:-1]) if len(info) == 3 else '/'.join(info)
             self.dataset_language = 'default'
             if ':' in self.dataset_name:
                 self.dataset_name, self.dataset_language = self.dataset_name.split(':')
         else:
             self.dataset_name = 'json'
-            self.dataset_split = 'train'
             self.dataset_language = 'default'
         if self.train_dir is not None:
             if os.path.isdir(self.train_dir):
-                files = os.listdir(self.train_dir)
                 # change all train directory paths to absolute
                 self.train_dir = os.path.join(os.path.abspath(os.getcwd()), self.train_dir)
-                self.train_path = [
-                    os.path.join(self.train_dir, f)
-                    for f in files
-                    if f.endswith('jsonl') or f.endswith('json')
-                ]
+                self.train_path = {
+                    'train': os.path.join(self.train_dir, 'train.jsonl'),
+                    'dev': os.path.join(self.train_dir, 'dev.jsonl'),
+                }
             else:
-                self.train_path = [self.train_dir]
+                self.train_path = {'train': self.train_dir}
         else:
             self.train_path = None
 
