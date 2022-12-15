@@ -12,10 +12,10 @@ from transformers import (
 
 from tevatron.arguments import ModelArguments, DataArguments, \
     TevatronTrainingArguments as TrainingArguments
-from tevatron.data import TrainDataset, QPCollator
+from tevatron.collator import QPCollator
+from tevatron.dataset import TrainDevDataset
 from tevatron.modeling import DenseModel
 from tevatron.trainer import TevatronTrainer as Trainer, GCTrainer
-from tevatron.datasets import HFTrainDevDataset
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,8 @@ def main():
             and not training_args.overwrite_output_dir
     ):
         raise ValueError(
-            f"Output directory ({training_args.output_dir}) already exists and is not empty. Use --overwrite_output_dir to overcome."
+            f"Output directory ({training_args.output_dir}) already exists and is not empty. "
+            f"Use --overwrite_output_dir to overcome."
         )
 
     # Setup logging
@@ -73,18 +74,20 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    train_dataset = HFTrainDevDataset(tokenizer=tokenizer, data_args=data_args, is_train=True,
-                                      cache_dir=data_args.data_cache_dir or model_args.cache_dir)
-    dev_dataset = HFTrainDevDataset(tokenizer=tokenizer, data_args=data_args, is_train=False,
+    train_dataset = TrainDevDataset(data_args=data_args, is_train=True,
                                     cache_dir=data_args.data_cache_dir or model_args.cache_dir)
+    dev_dataset = TrainDevDataset(data_args=data_args, is_train=False,
+                                  cache_dir=data_args.data_cache_dir or model_args.cache_dir)
+    """
     if training_args.local_rank > 0:
         print("Waiting for main process to perform the mapping")
         torch.distributed.barrier()
-    train_dataset = TrainDataset(data_args, train_dataset.process(), tokenizer)
-    dev_dataset = TrainDataset(data_args, dev_dataset.process(), tokenizer)
+    train_dataset = TrainDataset(data_args, train_dataset.dataset, tokenizer)
+    dev_dataset = TrainDataset(data_args, dev_dataset.dataset, tokenizer)
     if training_args.local_rank == 0:
         print("Loading results from main process")
         torch.distributed.barrier()
+    """
 
     trainer_cls = GCTrainer if training_args.grad_cache else Trainer
     trainer = trainer_cls(
@@ -93,7 +96,7 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=dev_dataset,
         data_collator=QPCollator(
-            tokenizer,
+            tokenizer=tokenizer,
             max_p_len=data_args.p_max_len,
             max_q_len=data_args.q_max_len
         ),

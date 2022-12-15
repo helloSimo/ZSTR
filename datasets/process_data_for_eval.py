@@ -9,7 +9,7 @@ from table_utils.table_processor import get_processor
 
 def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer_name_or_path):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
-    processer = get_processor(max_cell_length=max_cell_length,
+    processor = get_processor(max_cell_length=max_cell_length,
                               max_input_length=512,
                               tokenizer=tokenizer,
                               include_title=include_title,
@@ -19,8 +19,8 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
     dest_f = jsonlines.open(os.path.join('eval', 'corpus.jsonl'), 'w')
     for table in jsonlines.open(os.path.join(dataset, 'tables.jsonl')):
         dest_f.write({
-            'docid': table['id'],
-            'text': processer.process_table(table)
+            'id': table['id'],
+            'text': processor.process_table(table)
         })
 
 
@@ -28,8 +28,8 @@ def process_query(dataset):
     dest_f = jsonlines.open(os.path.join('eval', 'test.jsonl'), 'w')
     for qa in jsonlines.open(os.path.join(dataset, 'test.jsonl')):
         dest_f.write({
-            'query_id': qa['id'],
-            'query': qa['question']
+            'id': qa['id'],
+            'text': qa['question']
         })
 
 
