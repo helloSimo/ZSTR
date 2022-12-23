@@ -1,4 +1,5 @@
 import os
+import shutil
 import jsonlines
 import argparse
 from transformers import AutoTokenizer
@@ -39,6 +40,7 @@ def main(args):
 
     process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.include_title, args.tokenizer_name_or_path)
     process_query(args.dataset)
+    shutil.copyfile(os.path.join(args.dataset, 'test.jsonl'), os.path.join('eval', 'label.jsonl'))
 
 
 if __name__ == "__main__":
