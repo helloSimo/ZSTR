@@ -65,7 +65,7 @@ class TrainDevDataset(Dataset):
 class EncodeDataset(Dataset):
     input_keys = ['id', 'text']
 
-    def __init__(self, data_args: DataArguments, cache_dir: str, shard_num=1, shard_idx=0):
+    def __init__(self, data_args: DataArguments, cache_dir: str):
         data_files = data_args.encode_in_path
         if data_files:
             data_files = {'train': data_files}
@@ -73,7 +73,7 @@ class EncodeDataset(Dataset):
                                     data_args.dataset_language,
                                     data_files=data_files, cache_dir=cache_dir,
                                     use_auth_token=True)['train']
-        self.dataset = self.dataset.shard(shard_num, shard_idx)
+        self.dataset = self.dataset.shard(data_args.encode_num_shard, data_args.encode_shard_index)
 
     def __len__(self):
         return len(self.dataset)

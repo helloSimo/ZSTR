@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class SpladeModel(EncoderModel):
-    TRANSFORMER_CLS = AutoModelForMaskedLM
+    MODEL_CLS = AutoModelForMaskedLM
 
     def encode_passage(self, psg):
         if psg is None:

@@ -60,22 +60,15 @@ def main():
     )
 
     text_max_length = data_args.q_max_len if data_args.encode_is_qry else data_args.p_max_len
-    if data_args.encode_is_qry:
-        encode_dataset = EncodeDataset(data_args=data_args,
-                                        cache_dir=data_args.data_cache_dir or model_args.cache_dir)
-    else:
-        encode_dataset = EncodeDataset(tokenizer=tokenizer, data_args=data_args,
-                                         cache_dir=data_args.data_cache_dir or model_args.cache_dir)
-    encode_dataset = EncodeDataset(encode_dataset.process(data_args.encode_num_shard, data_args.encode_shard_index),
-                                   tokenizer, max_len=text_max_length)
+    encode_dataset = EncodeDataset(data_args=data_args,
+                                   cache_dir=data_args.data_cache_dir or model_args.cache_dir)
 
     encode_loader = DataLoader(
         encode_dataset,
         batch_size=training_args.per_device_eval_batch_size,
         collate_fn=EncodeCollator(
-            tokenizer,
-            max_length=text_max_length,
-            padding='max_length'
+            tokenizer=tokenizer,
+            max_len=text_max_length
         ),
         shuffle=False,
         drop_last=False,
