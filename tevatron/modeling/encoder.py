@@ -87,24 +87,19 @@ class EncoderModel(nn.Module):
             )
 
         # for training
-        if self.training:
-            if self.negatives_x_device:
-                q_reps = self._dist_gather_tensor(q_reps)
-                p_reps = self._dist_gather_tensor(p_reps)
+        if self.negatives_x_device:
+            q_reps = self._dist_gather_tensor(q_reps)
+            p_reps = self._dist_gather_tensor(p_reps)
 
-            scores = self.compute_similarity(q_reps, p_reps)
-            scores = scores.view(q_reps.size(0), -1)
+        scores = self.compute_similarity(q_reps, p_reps)
+        scores = scores.view(q_reps.size(0), -1)
 
-            target = torch.arange(scores.size(0), device=scores.device, dtype=torch.long)
-            target = target * (p_reps.size(0) // q_reps.size(0))
+        target = torch.arange(scores.size(0), device=scores.device, dtype=torch.long)
+        target = target * (p_reps.size(0) // q_reps.size(0))
 
-            loss = self.compute_loss(scores, target)
-            if self.negatives_x_device:
-                loss = loss * self.world_size  # counter average weight reduction
-        # for eval
-        else:
-            scores = self.compute_similarity(q_reps, p_reps)
-            loss = None
+        loss = self.compute_loss(scores, target)
+        if self.negatives_x_device:
+            loss = loss * self.world_size  # counter average weight reduction
         return EncoderOutput(
             loss=loss,
             scores=scores,

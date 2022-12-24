@@ -2,6 +2,7 @@ import os
 from itertools import repeat
 from typing import Dict, List, Tuple, Optional, Any, Union
 
+from torch import nn
 from transformers.trainer import Trainer
 
 import torch
@@ -63,6 +64,24 @@ class TevatronTrainer(Trainer):
 
     def training_step(self, *args):
         return super(TevatronTrainer, self).training_step(*args) / self._dist_loss_scale_factor
+
+    def prediction_step(
+            self,
+            model: nn.Module,
+            inputs: Tuple[Dict[str, Union[torch.Tensor, Any]], ...],
+            prediction_loss_only: bool,
+            ignore_keys: Optional[List[str]] = None,
+    ) -> Tuple[Optional[torch.Tensor], Optional[torch.Tensor], Optional[torch.Tensor]]:
+        with torch.no_grad():
+            inputs = self._prepare_inputs(inputs)
+            query, passage = inputs
+            output = model(query=query, passage=passage)
+            scores = output.scores
+            loss = output.loss
+
+            target = torch.arange(scores.size(0), device=scores.device, dtype=torch.long)
+            target = target * (passage['input_ids'].size(0) // query['input_ids'].size(0))
+        return loss, scores, target
 
 
 def split_dense_inputs(model_input: dict, chunk_size: int):

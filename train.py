@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 
+import numpy as np
 import torch
 from transformers import AutoConfig, AutoTokenizer
 from transformers import (
@@ -18,6 +19,16 @@ from tevatron.modeling import DenseModel
 from tevatron.trainer import TevatronTrainer as Trainer, GCTrainer
 
 logger = logging.getLogger(__name__)
+
+
+def compute_metrics(eval_prediction):
+    indices = np.argmax(eval_prediction.predictions, 1)
+    acc = (eval_prediction.label_ids == indices).sum()
+    acc /= eval_prediction.predictions.shape[0]
+
+    return {
+        "acc": acc,
+    }
 
 
 def main():
@@ -74,20 +85,16 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
+    if training_args.local_rank > 0:
+        print("Waiting for main process to perform the mapping")
+        torch.distributed.barrier()
     train_dataset = TrainDevDataset(data_args=data_args, is_train=True,
                                     cache_dir=data_args.data_cache_dir or model_args.cache_dir)
     dev_dataset = TrainDevDataset(data_args=data_args, is_train=False,
                                   cache_dir=data_args.data_cache_dir or model_args.cache_dir)
-    """
-    if training_args.local_rank > 0:
-        print("Waiting for main process to perform the mapping")
-        torch.distributed.barrier()
-    train_dataset = TrainDataset(data_args, train_dataset.dataset, tokenizer)
-    dev_dataset = TrainDataset(data_args, dev_dataset.dataset, tokenizer)
     if training_args.local_rank == 0:
         print("Loading results from main process")
         torch.distributed.barrier()
-    """
 
     trainer_cls = GCTrainer if training_args.grad_cache else Trainer
     trainer = trainer_cls(
@@ -100,15 +107,15 @@ def main():
             max_p_len=data_args.p_max_len,
             max_q_len=data_args.q_max_len
         ),
+        compute_metrics=compute_metrics
     )
     callback = EarlyStoppingCallback(early_stopping_patience=5)
     trainer.add_callback(callback)
     train_dataset.trainer = trainer
+    dev_dataset.trainer = trainer
 
     trainer.train()  # TODO: resume training
-    trainer.save_model()
-    if trainer.is_world_process_zero():
-        tokenizer.save_pretrained(training_args.output_dir)
+    # trainer.save_model()
 
 
 if __name__ == "__main__":
