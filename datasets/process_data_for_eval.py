@@ -2,6 +2,7 @@ import os
 import shutil
 import jsonlines
 import argparse
+from tqdm import tqdm
 from transformers import AutoTokenizer
 import sys
 sys.path.append('..')
@@ -18,7 +19,8 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
                               row_choose=True)
 
     dest_f = jsonlines.open(os.path.join('eval', 'corpus.jsonl'), 'w')
-    for table in jsonlines.open(os.path.join(dataset, 'tables.jsonl')):
+    print("processing corpus...")
+    for table in tqdm(jsonlines.open(os.path.join(dataset, 'tables.jsonl'))):
         dest_f.write({
             'id': table['id'],
             'text': processor.process_table(table)
@@ -27,7 +29,8 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
 
 def process_query(dataset):
     dest_f = jsonlines.open(os.path.join('eval', 'test.jsonl'), 'w')
-    for qa in jsonlines.open(os.path.join(dataset, 'test.jsonl')):
+    print("processing query...")
+    for qa in tqdm(jsonlines.open(os.path.join(dataset, 'test.jsonl'))):
         dest_f.write({
             'id': qa['id'],
             'text': qa['question']
