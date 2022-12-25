@@ -48,7 +48,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='WTQ', choices=['WTQ', 'WikiSQL', 'NQTables'])
+    parser.add_argument('--dataset', type=str, default='WTQ', choices=['WTQ', 'WikiSQL', 'NQTables', 'NQTablesFull'])
     parser.add_argument('--max_cell_length', type=int, default=8)
     parser.add_argument('--delimiter', action='store_true')
     parser.add_argument('--include_title', action='store_true')
