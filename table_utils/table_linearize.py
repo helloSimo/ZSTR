@@ -34,7 +34,7 @@ class TableLinearize(abc.ABC):
 
 class BasicTableLinearize(TableLinearize):
     """
-    FORMAT: (title) col1 col2 col val11 val12 val13 val21  val22 val23 ...
+    FORMAT: (title) col1 col2 col3 . val11 val12 val13 . val21  val22 val23 ...
     """
     def __init__(self, include_title: bool):
         super().__init__(include_title)
@@ -48,11 +48,11 @@ class BasicTableLinearize(TableLinearize):
         else:
             _table_str = ""
         # process header
-        _table_str += self.process_header(table_content["header"]) + " "
+        _table_str += self.process_header(table_content["header"])
         # process rows
         for i, row_example in enumerate(table_content["rows"]):
             # NOTE: the row should start from row 1 instead of 0
-            _table_str += self.process_row(row_example) + " "
+            _table_str += " . " + self.process_row(row_example)
         return _table_str.strip()
 
     def process_header(self, headers: List) -> str:
