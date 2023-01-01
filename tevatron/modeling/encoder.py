@@ -7,7 +7,7 @@ from typing import Dict, Optional
 import torch
 from torch import nn, Tensor
 import torch.distributed as dist
-from transformers import PreTrainedModel, AutoModel, AutoConfig
+from transformers import PreTrainedModel, AutoModel, DPRContextEncoder
 from transformers.file_utils import ModelOutput
 
 from tevatron.arguments import ModelArguments, \
@@ -53,7 +53,7 @@ class EncoderPooler(nn.Module):
 
 class EncoderModel(nn.Module):
     MODEL_CLS = AutoModel
-    CONFIG_CLS = AutoConfig
+    DPR_CLS = DPRContextEncoder
 
     def __init__(self,
                  lm_q: PreTrainedModel,
@@ -152,36 +152,29 @@ class EncoderModel(nn.Module):
             if model_args.untie_encoder:
                 _qry_model_path = os.path.join(model_args.model_name_or_path, 'query_model')
                 _psg_model_path = os.path.join(model_args.model_name_or_path, 'passage_model')
-                if not os.path.exists(_qry_model_path):
-                    _qry_model_path = model_args.model_name_or_path
-                    _psg_model_path = model_args.model_name_or_path
                 logger.info(f'loading query model weight from {_qry_model_path}')
-                lm_q = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(
-                    _qry_model_path,
-                    **hf_kwargs
-                ))
+                lm_q = cls.MODEL_CLS.from_pretrained(_qry_model_path, **hf_kwargs)
                 logger.info(f'loading passage model weight from {_psg_model_path}')
-                lm_p = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(
-                    _psg_model_path,
-                    **hf_kwargs
-                ))
+                if model_args.dpr:
+                    lm_p = cls.DPR_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
+                else:
+                    lm_p = cls.MODEL_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
             else:
-                lm_q = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(model_args.model_name_or_path,
-                                                                                **hf_kwargs))
+                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
                 lm_p = lm_q
         # load pre-trained
         else:
             if model_args.untie_encoder:
-                lm_q = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(model_args.model_name_or_path,
-                                                                                **hf_kwargs))
+                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
                 if model_args.additional_model_name is None:
                     lm_p = copy.deepcopy(lm_q)
                 else:
-                    lm_p = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(model_args.additional_model_name,
-                                                                                    **hf_kwargs))
+                    if model_args.dpr:
+                        lm_p = cls.DPR_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
+                    else:
+                        lm_p = cls.MODEL_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
             else:
-                lm_q = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(model_args.model_name_or_path,
-                                                                                **hf_kwargs))
+                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
                 lm_p = lm_q
 
         if model_args.add_pooler:
@@ -202,6 +195,7 @@ class EncoderModel(nn.Module):
     def load_for_encode(
             cls,
             model_name_or_path,
+            dpr,
             encode_is_qry,
             **hf_kwargs,
     ):
@@ -209,30 +203,29 @@ class EncoderModel(nn.Module):
         lm_p = None
         _qry_model_path = os.path.join(model_name_or_path, 'query_model')
         _psg_model_path = os.path.join(model_name_or_path, 'passage_model')
-        # separate weight
+        # from _qry_model_path or _psg_model_path
         if os.path.isdir(model_name_or_path) and os.path.exists(_qry_model_path):
             logger.info(f'found separate weight for query/passage encoders')
             if encode_is_qry:
                 logger.info(f'loading query model weight from {_qry_model_path}')
-                lm_q = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(
-                    _qry_model_path,
-                    **hf_kwargs
-                ))
+                lm_q = cls.MODEL_CLS.from_pretrained(_qry_model_path, **hf_kwargs)
             else:
                 logger.info(f'loading passage model weight from {_psg_model_path}')
-                lm_p = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(
-                    _psg_model_path,
-                    **hf_kwargs
-                ))
-        # tied weight
-        # from name or path
+                if dpr:
+                    lm_p = cls.DPR_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
+                else:
+                    lm_p = cls.MODEL_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
+        # from model_name_or_path
         else:
             logger.info(f'try loading tied weight')
             logger.info(f'loading model weight from {model_name_or_path}')
             if encode_is_qry:
-                lm_q = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(model_name_or_path, **hf_kwargs))
+                lm_q = cls.MODEL_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
             else:
-                lm_p = cls.MODEL_CLS.from_config(cls.CONFIG_CLS.from_pretrained(model_name_or_path, **hf_kwargs))
+                if dpr:
+                    lm_p = cls.DPR_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
+                else:
+                    lm_p = cls.MODEL_CLS.from_pretrained(model_name_or_path, **hf_kwargs)
 
         pooler_weights = os.path.join(model_name_or_path, 'pooler.pt')
         pooler_config = os.path.join(model_name_or_path, 'pooler_config.json')

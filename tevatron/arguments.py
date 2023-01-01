@@ -34,6 +34,11 @@ class ModelArguments:
         metadata={"help": "no weight sharing between qry passage encoders"}
     )
 
+    dpr: bool = field(
+        default=False,
+        metadata={"help": "to fix DPRContextEncoder load problem"}
+    )
+
     # out projection
     add_pooler: bool = field(default=False)
     projection_in_dim: int = field(default=768)
