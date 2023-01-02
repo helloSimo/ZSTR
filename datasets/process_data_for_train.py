@@ -32,11 +32,14 @@ def main(args):
     if not os.path.exists('train'):
         os.mkdir('train')
 
+    with open(os.path.join('train', 'setting.txt'), 'w') as f:
+        print(args, file=f)
+
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path)
     processor = get_processor(max_cell_length=args.max_cell_length,
                               max_input_length=512,
                               tokenizer=tokenizer,
-                              include_title=args.include_title,
+                              include_title=args.title,
                               index_row=args.delimiter,
                               row_choose=True)
     corpus = get_corpus(args.dataset, processor)
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument('--negative_num', type=int, default=4)
     parser.add_argument('--max_cell_length', type=int, default=8)
     parser.add_argument('--delimiter', action='store_true')
-    parser.add_argument('--include_title', action='store_true')
+    parser.add_argument('--title', action='store_true')
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')
 
     args = parser.parse_args()

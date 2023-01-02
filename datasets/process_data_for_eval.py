@@ -41,7 +41,10 @@ def main(args):
     if not os.path.exists('eval'):
         os.mkdir('eval')
 
-    process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.include_title, args.tokenizer_name_or_path)
+    with open(os.path.join('eval', 'setting.txt'), 'w') as f:
+        print(args, file=f)
+
+    process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.title, args.tokenizer_name_or_path)
     process_query(args.dataset)
     shutil.copyfile(os.path.join(args.dataset, 'test.jsonl'), os.path.join('eval', 'label.jsonl'))
 
@@ -51,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset', type=str, default='WTQ', choices=['WTQ', 'WikiSQL', 'NQTables', 'NQTablesFull'])
     parser.add_argument('--max_cell_length', type=int, default=8)
     parser.add_argument('--delimiter', action='store_true')
-    parser.add_argument('--include_title', action='store_true')
+    parser.add_argument('--title', action='store_true')
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')
 
     args = parser.parse_args()
