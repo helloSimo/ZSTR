@@ -150,30 +150,44 @@ class EncoderModel(nn.Module):
         # load local
         if os.path.isdir(model_args.model_name_or_path):
             if model_args.untie_encoder:
-                _qry_model_path = os.path.join(model_args.model_name_or_path, 'query_model')
-                _psg_model_path = os.path.join(model_args.model_name_or_path, 'passage_model')
-                logger.info(f'loading query model weight from {_qry_model_path}')
-                lm_q = cls.MODEL_CLS.from_pretrained(_qry_model_path, **hf_kwargs)
-                logger.info(f'loading passage model weight from {_psg_model_path}')
-                if model_args.dpr:
-                    lm_p = cls.DPR_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
-                else:
-                    lm_p = cls.MODEL_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
-            else:
-                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
-                lm_p = lm_q
-        # load pre-trained
-        else:
-            if model_args.untie_encoder:
-                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
                 if model_args.additional_model_name is None:
-                    lm_p = copy.deepcopy(lm_q)
+                    _qry_model_path = os.path.join(model_args.model_name_or_path, 'query_model')
+                    _psg_model_path = os.path.join(model_args.model_name_or_path, 'passage_model')
+                    logger.info(f'loading query model weight from {_qry_model_path}')
+                    lm_q = cls.MODEL_CLS.from_pretrained(_qry_model_path, **hf_kwargs)
+                    logger.info(f'loading passage model weight from {_psg_model_path}')
+                    if model_args.dpr:
+                        lm_p = cls.DPR_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
+                    else:
+                        lm_p = cls.MODEL_CLS.from_pretrained(_psg_model_path, **hf_kwargs)
                 else:
+                    logger.info(f'loading query model weight from {model_args.model_name_or_path}')
+                    lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
+                    logger.info(f'loading passage model weight from {model_args.additional_model_name}')
                     if model_args.dpr:
                         lm_p = cls.DPR_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
                     else:
                         lm_p = cls.MODEL_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
             else:
+                logger.info(f'loading query and passage model weight from {model_args.model_name_or_path}')
+                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
+                lm_p = lm_q
+        # load pre-trained
+        else:
+            if model_args.untie_encoder:
+                logger.info(f'loading query model weight from {model_args.model_name_or_path}')
+                lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
+                if model_args.additional_model_name is None:
+                    logger.info(f'loading passage model weight from {model_args.model_name_or_path}')
+                    lm_p = copy.deepcopy(lm_q)
+                else:
+                    logger.info(f'loading passage model weight from {model_args.additional_model_name}')
+                    if model_args.dpr:
+                        lm_p = cls.DPR_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
+                    else:
+                        lm_p = cls.MODEL_CLS.from_pretrained(model_args.additional_model_name, **hf_kwargs)
+            else:
+                logger.info(f'loading query and passage model weight from {model_args.model_name_or_path}')
                 lm_q = cls.MODEL_CLS.from_pretrained(model_args.model_name_or_path, **hf_kwargs)
                 lm_p = lm_q
 
