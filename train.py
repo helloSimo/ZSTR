@@ -83,10 +83,10 @@ def main():
         torch.distributed.barrier()
     train_dataset = TrainDevDataset(data_args=data_args, is_train=True,
                                     cache_dir=data_args.data_cache_dir or model_args.cache_dir,
-                                    negative_size=data_args.train_n_passages)
+                                    negative_size=data_args.train_negative_num)
     dev_dataset = TrainDevDataset(data_args=data_args, is_train=False,
                                   cache_dir=data_args.data_cache_dir or model_args.cache_dir,
-                                  negative_size=data_args.dev_n_passages)
+                                  negative_size=data_args.dev_negative_num)
     if training_args.local_rank == 0:
         print("Loading results from main process")
         torch.distributed.barrier()
