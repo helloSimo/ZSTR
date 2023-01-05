@@ -8,7 +8,8 @@ from tevatron.trainer import TevatronTrainer
 
 
 class TrainDevDataset(Dataset):
-    def __init__(self, data_args: DataArguments, is_train: bool, cache_dir: str, negative_size: int, trainer: TevatronTrainer = None):
+    def __init__(self, data_args: DataArguments, is_train: bool, cache_dir: str, negative_num: int,
+                 trainer: TevatronTrainer = None):
         if is_train:
             dataset_split = 'train'
         else:
@@ -20,7 +21,7 @@ class TrainDevDataset(Dataset):
 
         self.data_args = data_args
         self.trainer = trainer
-        self.negative_size = negative_size
+        self.negative_num = negative_num
 
     def __len__(self):
         return len(self.dataset)
@@ -43,18 +44,18 @@ class TrainDevDataset(Dataset):
             pos_psg = group_positives[(_hashed_seed + epoch) % len(group_positives)]
         passages.append(pos_psg)
 
-        if len(group_negatives) < self.negative_size:
-            negs = random.choices(group_negatives, k=self.negative_size)
-        elif self.negative_size == 1:
+        if len(group_negatives) < self.negative_num:
+            negs = random.choices(group_negatives, k=self.negative_num)
+        elif self.negative_num == 1:
             negs = []
         elif self.data_args.negative_passage_no_shuffle:
-            negs = group_negatives[:self.negative_size]
+            negs = group_negatives[:self.negative_num]
         else:
-            _offset = epoch * self.negative_size % len(group_negatives)
+            _offset = epoch * self.negative_num % len(group_negatives)
             negs = [x for x in group_negatives]
             random.Random(_hashed_seed).shuffle(negs)
             negs = negs * 2
-            negs = negs[_offset: _offset + self.negative_size]
+            negs = negs[_offset: _offset + self.negative_num]
 
         for neg_psg in negs:
             passages.append(neg_psg)
