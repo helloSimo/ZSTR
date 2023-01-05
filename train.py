@@ -82,9 +82,11 @@ def main():
         print("Waiting for main process to perform the mapping")
         torch.distributed.barrier()
     train_dataset = TrainDevDataset(data_args=data_args, is_train=True,
-                                    cache_dir=data_args.data_cache_dir or model_args.cache_dir)
+                                    cache_dir=data_args.data_cache_dir or model_args.cache_dir,
+                                    negative_size=data_args.train_n_passages)
     dev_dataset = TrainDevDataset(data_args=data_args, is_train=False,
-                                  cache_dir=data_args.data_cache_dir or model_args.cache_dir)
+                                  cache_dir=data_args.data_cache_dir or model_args.cache_dir,
+                                  negative_size=data_args.dev_n_passages)
     if training_args.local_rank == 0:
         print("Loading results from main process")
         torch.distributed.barrier()

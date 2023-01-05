@@ -67,6 +67,7 @@ class DataArguments:
         default=12, metadata={"help": "number of proc used in dataset preprocess"}
     )
     train_n_passages: int = field(default=8)
+    dev_n_passages: int = field(default=8)
     positive_passage_no_shuffle: bool = field(
         default=False, metadata={"help": "always use the first positive passage"})
     negative_passage_no_shuffle: bool = field(
