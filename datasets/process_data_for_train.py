@@ -29,10 +29,12 @@ def get_bm25(texts, tokenizer):
 
 
 def main(args):
-    if not os.path.exists('train'):
-        os.mkdir('train')
+    if args.output_dir is None:
+        args.output_dir = 'train'
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
 
-    with open(os.path.join('train', 'setting.txt'), 'w') as f:
+    with open(os.path.join(args.output_dir, 'setting.txt'), 'w') as f:
         print(args, file=f)
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path)
@@ -48,7 +50,11 @@ def main(args):
 
     print("building data...")
     for split in ['train', 'dev']:
-        dest_f = jsonlines.open(os.path.join('train', '{}.jsonl'.format(split)), 'w')
+        if split == 'train':
+            negative_num = args.train_negative_num
+        else:
+            negative_num = args.dev_negative_num
+        dest_f = jsonlines.open(os.path.join(args.output_dir, '{}.jsonl'.format(split)), 'w')
         for i, qa in tqdm(enumerate(jsonlines.open(os.path.join(args.dataset, '{}.jsonl'.format(split))))):
             positive_passages = []
             for id_ in qa['table_id']:
@@ -64,7 +70,7 @@ def main(args):
                     if id_ not in qa['table_id']:
                         negative_passages.append(corpus[id_])
                         cnt += 1
-                        if cnt == args.negative_num:
+                        if cnt == negative_num:
                             done_flag = True
                             break
                 if done_flag:
@@ -81,7 +87,9 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='WTQ', choices=['WTQ', 'WikiSQL', 'NQTables'])
-    parser.add_argument('--negative_num', type=int, default=4)
+    parser.add_argument('--output_dir', type=str, default=None)
+    parser.add_argument('--train_negative_num', type=int, default=8)
+    parser.add_argument('--dev_negative_num', type=int, default=8)
     parser.add_argument('--max_cell_length', type=int, default=8)
     parser.add_argument('--delimiter', action='store_true')
     parser.add_argument('--title', action='store_true')
