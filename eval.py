@@ -1,4 +1,6 @@
 import csv
+import os.path
+
 import jsonlines
 import pytrec_eval
 from argparse import ArgumentParser
@@ -35,6 +37,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--rank_path', required=True)
     parser.add_argument('--label_path', required=True)
+    parser.add_argument('--result_txt', action='store_true')
 
     args = parser.parse_args()
 
@@ -67,6 +70,11 @@ def main():
     for r in results:
         results_str += '{:.2f}\t'.format(r / tot * 100)
     logger.info(results_str)
+
+    if args.result_txt:
+        output_dir = os.path.dirname(args.rank_path)
+        with open(os.path.join(output_dir, 'result.txt'), 'a+') as f:
+            print(results_str[:-1], file=f)
 
 
 if __name__ == '__main__':
