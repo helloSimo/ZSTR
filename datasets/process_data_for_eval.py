@@ -9,7 +9,7 @@ sys.path.append('..')
 from table_utils.table_processor import get_processor
 
 
-def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer_name_or_path):
+def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer_name_or_path, output_dir):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path)
     processor = get_processor(max_cell_length=max_cell_length,
                               max_input_length=512,
@@ -18,7 +18,7 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
                               index_row=delimiter,
                               row_choose=True)
 
-    dest_f = jsonlines.open(os.path.join('eval', 'corpus.jsonl'), 'w')
+    dest_f = jsonlines.open(os.path.join(output_dir, 'corpus.jsonl'), 'w')
     print("processing corpus...")
     for table in tqdm(jsonlines.open(os.path.join(dataset, 'tables.jsonl'))):
         dest_f.write({
@@ -27,8 +27,8 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
         })
 
 
-def process_query(dataset):
-    dest_f = jsonlines.open(os.path.join('eval', 'test.jsonl'), 'w')
+def process_query(dataset, output_dir):
+    dest_f = jsonlines.open(os.path.join(output_dir, 'test.jsonl'), 'w')
     print("processing query...")
     for qa in tqdm(jsonlines.open(os.path.join(dataset, 'test.jsonl'))):
         dest_f.write({
@@ -38,20 +38,24 @@ def process_query(dataset):
 
 
 def main(args):
-    if not os.path.exists('eval'):
-        os.mkdir('eval')
+    if args.output_dir is None:
+        args.output_dir = 'train'
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
 
-    with open(os.path.join('eval', 'setting.txt'), 'w') as f:
+    with open(os.path.join(args.output_dir, 'setting.txt'), 'w') as f:
         print(args, file=f)
 
-    process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.title, args.tokenizer_name_or_path)
-    process_query(args.dataset)
-    shutil.copyfile(os.path.join(args.dataset, 'test.jsonl'), os.path.join('eval', 'label.jsonl'))
+    process_corpus(args.dataset, args.max_cell_length, args.delimiter, args.title, args.tokenizer_name_or_path,
+                   args.output_dir)
+    process_query(args.dataset, args.output_dir)
+    shutil.copyfile(os.path.join(args.dataset, 'test.jsonl'), os.path.join(args.output_dir, 'label.jsonl'))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='WTQ', choices=['WTQ', 'WikiSQL', 'NQTables', 'NQTablesFull'])
+    parser.add_argument('--output_dir', type=str, default=None)
     parser.add_argument('--max_cell_length', type=int, default=8)
     parser.add_argument('--delimiter', action='store_true')
     parser.add_argument('--title', action='store_true')
