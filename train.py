@@ -104,8 +104,9 @@ def main():
         ),
         compute_metrics=compute_metrics
     )
-    callback = EarlyStoppingCallback(early_stopping_patience=5)
-    trainer.add_callback(callback)
+    if training_args.early_stop > 0:
+        callback = EarlyStoppingCallback(early_stopping_patience=training_args.early_stop)
+        trainer.add_callback(callback)
     train_dataset.trainer = trainer
     dev_dataset.trainer = trainer
 
