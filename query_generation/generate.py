@@ -57,7 +57,7 @@ def get_bm25(texts, tokenizer):
 
 
 def main(args):
-    set_seed(42)
+    set_seed(args.seed)
 
     if args.output_dir is None:
         args.output_dir = 'train'
@@ -70,11 +70,11 @@ def main(args):
     # process table corpus
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path)
     processor = get_processor(max_cell_length=args.max_cell_length,
-                              max_input_length=512,
+                              max_input_length=args.max_input_length,
                               tokenizer=tokenizer,
                               include_title=args.title,
                               index_row=args.delimiter,
-                              row_choose=True)
+                              row_choose=False)
     corpus = get_corpus(args.dataset, processor)
 
     # collect split corpus from corpus
@@ -149,6 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('--train_negative_num', type=int, default=8)
     parser.add_argument('--dev_negative_num', type=int, default=8)
     parser.add_argument('--max_cell_length', type=int, default=8)
+    parser.add_argument('--max_input_length', type=int, default=128, choices=[128, 256])
     parser.add_argument('--delimiter', action='store_true')
     parser.add_argument('--title', action='store_true')
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')
@@ -156,6 +157,7 @@ if __name__ == "__main__":
     parser.add_argument('--model_name_or_path', type=str, default='BeIR/query-gen-msmarco-t5-base-v1')
     parser.add_argument('--max_query_length', type=int, default=128)
     parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--seed', type=int, default=42)
 
     main_args = parser.parse_args()
 
