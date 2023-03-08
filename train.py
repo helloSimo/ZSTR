@@ -111,6 +111,8 @@ def main():
     dev_dataset.trainer = trainer
 
     trainer.train()  # TODO: resume training
+    with open(os.path.join(training_args.output_dir, 'setting.txt'), 'w') as f:
+        f.write(str(training_args))
     # trainer.save_model()
 
 
