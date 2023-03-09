@@ -41,7 +41,7 @@ def train(args):
 
     train_model(device=args.device,
                 dataset=args.prefix+args.dataset,
-                max_len=args.max_len,
+                max_len=args.length,
                 lr_name=args.lr_name,
                 epoch_num=args.epoch_num)
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=int, choices=[0, 1, 2, 3])
     parser.add_argument('--prefix', type=str, default='')
     parser.add_argument('--dataset', type=str, choices=['WTQ', 'WSQL', 'NQT', 'NQTt'])
-    parser.add_argument('--max_len', type=int, choices=[128, 256])
+    parser.add_argument('--length', type=int, choices=[128, 256])
     parser.add_argument('--lr_name', type=str, choices=['2e5', '1e5', '5e6', '1e6'])
     parser.add_argument('--epoch_num', type=int)
 
