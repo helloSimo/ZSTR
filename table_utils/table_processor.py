@@ -11,7 +11,7 @@ class TableProcessor(object):
         self.table_linearize_func = table_linearize_func
         self.table_truncate_funcs = table_truncate_funcs
 
-    def process_table(self, table_content: Dict) -> str:
+    def process_table(self, table_content: Dict) -> tuple:
         """
         Preprocess a sentence into the expected format for model translate.
         """
@@ -19,7 +19,7 @@ class TableProcessor(object):
         for truncate_func in self.table_truncate_funcs:
             truncate_func.truncate_table(table_content)
         # linearize a table into a string
-        return self.table_linearize_func.process_table(table_content)
+        return self.table_linearize_func.process_table(table_content), table_content
 
 
 def get_processor(max_cell_length: int, max_input_length: int, tokenizer: PreTrainedTokenizer,

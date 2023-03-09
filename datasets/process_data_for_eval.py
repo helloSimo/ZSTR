@@ -23,7 +23,7 @@ def process_corpus(dataset, max_cell_length, delimiter, include_title, tokenizer
     for table in tqdm(jsonlines.open(os.path.join(dataset, 'tables.jsonl'))):
         dest_f.write({
             'id': table['id'],
-            'text': processor.process_table(table)
+            'text': processor.process_table(table)[0]
         })
 
 

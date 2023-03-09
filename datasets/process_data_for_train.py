@@ -14,7 +14,7 @@ def get_corpus(dataset, processor):
     corpus = collections.OrderedDict()
     print("processing corpus for bm25...")
     for table in tqdm(jsonlines.open(os.path.join(dataset, 'tables.jsonl'))):
-        corpus[table['id']] = processor.process_table(table)
+        corpus[table['id']] = processor.process_table(table)[0]
     return corpus
 
 
