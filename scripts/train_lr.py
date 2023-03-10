@@ -23,11 +23,15 @@ def train(args):
             else:
                 epoch_idx = 1
             for epoch_num in epoch_list[epoch_idx]:
-                train_model(device=args.device,
-                            dataset=args.prefix+dataset,
-                            max_len=max_len,
-                            lr_name=args.lr_name,
-                            epoch_num=epoch_num)
+                try:
+                    train_model(device=args.device,
+                                dataset=args.prefix + dataset,
+                                max_len=max_len,
+                                lr_name=args.lr_name,
+                                epoch_num=epoch_num)
+                except Exception as e:
+                    print(e)
+                    exit(-1)
 
 
 if __name__ == "__main__":

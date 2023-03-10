@@ -23,7 +23,11 @@ def eval_main(args):
     prefix = args.prefix
 
     for model_name in get_model_list(lr_name, prefix):
-        eval_model(model_name, device)
+        try:
+            eval_model(model_name, device)
+        except Exception as e:
+            print(e)
+            exit(-1)
         get_best_ckpt(model_name)
 
 
