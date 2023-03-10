@@ -18,16 +18,6 @@ def get_corpus(dataset, processor):
     return corpus
 
 
-def get_bm25(texts, tokenizer):
-    tokenized_texts = []
-    print("tokenizing corpus for bm25...")
-    for text in tqdm(texts):
-        tokens = tokenizer.tokenize(text)
-        tokenized_text = tokenizer.convert_tokens_to_string(tokens)
-        tokenized_texts.append(tokenized_text)
-    return BM25Okapi(tokenized_texts)
-
-
 def main(args):
     if args.output_dir is None:
         args.output_dir = 'train'
@@ -45,7 +35,7 @@ def main(args):
                               index_row=args.delimiter,
                               row_choose=True)
     corpus = get_corpus(args.dataset, processor)
-    bm25 = get_bm25(corpus.values(), tokenizer)
+    bm25 = BM25Okapi(corpus.values())
     ids = list(corpus.keys())
 
     print("building data...")

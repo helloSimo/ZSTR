@@ -44,16 +44,6 @@ def get_split_qas(generator, split_corpus, split_count, max_query_length, batch_
     return split_qas
 
 
-def get_bm25(texts, tokenizer):
-    tokenized_texts = []
-    print("tokenizing corpus for bm25...")
-    for text in tqdm(texts):
-        tokens = tokenizer.tokenize(text)
-        tokenized_text = tokenizer.convert_tokens_to_string(tokens)
-        tokenized_texts.append(tokenized_text)
-    return BM25Okapi(tokenized_texts)
-
-
 def main(args):
     set_seed(args.seed)
 
@@ -99,7 +89,7 @@ def main(args):
                             max_query_length=args.max_query_length,
                             batch_size=args.batch_size)
 
-    bm25 = get_bm25(corpus.values(), tokenizer)
+    bm25 = BM25Okapi(corpus.values())
     ids = list(corpus.keys())
 
     print("building data...")
