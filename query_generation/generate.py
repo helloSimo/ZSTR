@@ -38,8 +38,6 @@ def get_split_qas(generator, split_corpus, split_count, max_query_length, batch_
                                    max_length=max_query_length,
                                    ques_per_passage=math.ceil(split_count / len(split_corpus)),
                                    batch_size=batch_size)
-    # while len(split_qas) > split_count:
-    #     split_qas.pop(random.randrange(len(split_qas)))
     random.shuffle(split_qas)
     while len(split_qas) > split_count:
         split_qas.pop()
