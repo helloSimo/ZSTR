@@ -11,6 +11,7 @@ import re
 import sys
 sys.path.append('..')
 from table_utils.table_processor import get_processor
+from model import Generator
 
 
 def get_corpus(dataset, processor):
@@ -18,7 +19,7 @@ def get_corpus(dataset, processor):
     tables = {}
     print("processing corpus...")
     for table in tqdm(jsonlines.open(os.path.join('../datasets/', dataset, 'tables.jsonl'))):
-        corpus[table['id']], tables[table['id']] = processor.process_table(table)[0]
+        corpus[table['id']], tables[table['id']] = processor.process_table(table)
     return corpus, tables
 
 
@@ -29,11 +30,11 @@ def get_split_tables(tables, dataset, split):
     pattern3 = re.compile(r'^\(\s*\d+(?:[.,]\d+)*\s*\)$')
 
     count = 0
-    split_tables = {}
+    split_tables = []
     for qa in jsonlines.open(os.path.join('../datasets/', dataset, '{}.jsonl'.format(split))):
         count += 1
         for table_id in qa['table_id']:
-            if len(tables[table_id]['rows']) < 2 or table_id in tables:
+            if len(tables[table_id]['rows']) < 2 or table_id in split_tables:
                 continue
 
             table = tables[table_id]
@@ -51,31 +52,17 @@ def get_split_tables(tables, dataset, split):
                 else:
                     types.append('text')
             table['types'] = types
-            split_tables[table_id] = table
+            split_tables.append(table)
     return split_tables, count
 
 
-def get_split_qas(generator, split_corpus, split_count, max_query_length, batch_size):
-    split_qas = generator.generate(corpus=split_corpus,
-                                   max_length=max_query_length,
-                                   ques_per_passage=math.ceil(split_count / len(split_corpus)),
-                                   batch_size=batch_size)
-    # while len(split_qas) > split_count:
-    #     split_qas.pop(random.randrange(len(split_qas)))
+def get_split_qas(generator, split_tables, split_count):
+    split_qas = generator.generate(tgt_tables=split_tables,
+                                   ques_per_passage=math.ceil(split_count / len(split_tables)))
     random.shuffle(split_qas)
     while len(split_qas) > split_count:
         split_qas.pop()
     return split_qas
-
-
-def get_bm25(texts, tokenizer):
-    tokenized_texts = []
-    print("tokenizing corpus for bm25...")
-    for text in tqdm(texts):
-        tokens = tokenizer.tokenize(text)
-        tokenized_text = tokenizer.convert_tokens_to_string(tokens)
-        tokenized_texts.append(tokenized_text)
-    return BM25Okapi(tokenized_texts)
 
 
 def main(args):
@@ -104,26 +91,22 @@ def main(args):
     train_tables, train_count = get_split_tables(tables=tables,
                                                  dataset=args.dataset,
                                                  split='train')
-    dev_tables, dev_count = get_split_tables(tables=corpus,
+    dev_tables, dev_count = get_split_tables(tables=tables,
                                              dataset=args.dataset,
                                              split='dev')
 
     # get generator
-    generator = QueryGenerator(model=QGenModel(args.model_name_or_path))
+    generator = Generator()
 
     # get split qas
     train_qas = get_split_qas(generator=generator,
-                              split_corpus=train_corpus,
-                              split_count=train_count,
-                              max_query_length=args.max_query_length,
-                              batch_size=args.batch_size)
+                              split_tables=train_tables,
+                              split_count=train_count,)
     dev_qas = get_split_qas(generator=generator,
-                            split_corpus=dev_corpus,
-                            split_count=dev_count,
-                            max_query_length=args.max_query_length,
-                            batch_size=args.batch_size)
+                            split_tables=dev_tables,
+                            split_count=dev_count)
 
-    bm25 = get_bm25(corpus.values(), tokenizer)
+    bm25 = BM25Okapi(corpus.values())
     ids = list(corpus.keys())
 
     print("building data...")
