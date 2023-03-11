@@ -2,6 +2,7 @@ import os
 import re
 import json
 import random
+from copy import deepcopy
 from typing import Dict, List
 from collections import defaultdict
 
@@ -113,14 +114,8 @@ def generate_sql_on_target_table(_sql_struct: List,
                 keyword_type in ["Column", "Literal.String", "Literal.Number"]:
             _sql_struct[i][1] = src_map_to_tgt[keyword_name]
 
-    try:
-        _tgt_encode_sql = flatten_sql(_tgt_table['header'], _sql_struct)
-        print(_tgt_encode_sql)
-    except Exception as e:
-        print(src_map_to_tgt)
-        print(_tgt_table['header'])
-        print(_sql_struct)
-        raise e
+    _tgt_encode_sql = flatten_sql(_tgt_table['header'], _sql_struct)
+
     return _tgt_encode_sql
 
 
@@ -141,11 +136,13 @@ class Generator:
             sql_cnt = 0
             while sql_cnt < ques_per_passage:
                 example = random.choice(self.examples)
-                sql_struct = example["sql"]
+                sql_struct = deepcopy(example["sql"])
                 src_table = self.src_tables[example['tbl']]
+
                 sql = generate_sql_on_target_table(_sql_struct=sql_struct,
                                                    _src_table=src_table,
                                                    _tgt_table=tgt_table)
+
                 if sql is not None:
                     sql_cnt += 1
                     qa_cnt += 1
