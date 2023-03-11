@@ -10,20 +10,20 @@ def flatten_sql(headers: List, _ex_sql_struct: List):
     # [ "Keyword", "select", [] ], [ "Column", "c4", [] ]
     _encode_sql = []
     for _ex_tuple in _ex_sql_struct:
+        keyword_type = _ex_tuple[0]
         keyword = str(_ex_tuple[1])
-        assert '_' not in keyword
         # extra column, which we do not need in result
         if keyword == "w" or keyword == "from":
             continue
-        elif re.fullmatch(r"c\d+(_.+)?", keyword):
+        if re.fullmatch(r"c\d+(_.+)?", keyword):
             # only take the first part
             index_key = int(keyword.split("_")[0][1:]) - 1
-            _encode_sql.append(headers[index_key])
-        else:
-            _encode_sql.append(keyword)
-        # c4_list, replace it with the original one
-        # if "_address" in keyword or "_list" in keyword:
-        #     keyword = re.findall(r"c\d+", keyword)[0]
+            keyword = headers[index_key]
+
+        if keyword_type in ["Column", "Literal.String", "Literal.Number"] \
+                and ' ' in keyword:
+            keyword = "'{}'".format(keyword)
+        _encode_sql.append(keyword)
 
     return " ".join(_encode_sql)
 
@@ -37,7 +37,7 @@ def generate_sql_on_target_table(_sql_struct: List,
         col_example = src_col_content[i]
         for j in range(len(col_example)):
             # map from value to a column
-            src_val_records[str(col_example[j])].add("c" + str(i + 1))
+            src_val_records[str(col_example[j]).strip("'")].add("c" + str(i + 1))
 
     # use for sample value to replace the original one
     tgt_col_content = list(map(list, zip(*_tgt_table["rows"])))
@@ -45,7 +45,6 @@ def generate_sql_on_target_table(_sql_struct: List,
     for example in tgt_col_content:
         tgt_val_list.extend([_ for _ in example if _ != "none"])
 
-    tgt_col_alias = _tgt_table["alias"]
     tgt_num_cols, tgt_str_cols = [], []
     for i in range(len(_tgt_table["header"])):
         if _tgt_table["types"][i] == 'number':
@@ -102,22 +101,26 @@ def generate_sql_on_target_table(_sql_struct: List,
                     # find the content, randomly take one value as the replacement
                     tgt_rand_val = tgt_col_content[tgt_val_col_ind]
                     tgt_rand_val = random.choice(tgt_rand_val)
-                    try:
-                        src_map_to_tgt[keyword_name] = int(tgt_rand_val)
-                    except ValueError:
-                        src_map_to_tgt[keyword_name] = "'{}'".format(tgt_rand_val)
+                    src_map_to_tgt[keyword_name] = tgt_rand_val
             else:
                 if keyword_type == "Literal.Number":
                     random_val = str(random.randint(0, 2023))
                 else:
-                    random_val = "'{}'".format(random.choice(tgt_val_list))
+                    random_val = random.choice(tgt_val_list)
                 src_map_to_tgt[keyword_name] = random_val
 
-            if keyword_name in src_map_to_tgt and \
-                    keyword_type in ["Column", "Literal.String", "Literal.Number"]:
-                _sql_struct[i][1] = src_map_to_tgt[keyword_name]
+        if keyword_name in src_map_to_tgt and \
+                keyword_type in ["Column", "Literal.String", "Literal.Number"]:
+            _sql_struct[i][1] = src_map_to_tgt[keyword_name]
 
-    _tgt_encode_sql = flatten_sql(_tgt_table['header'], _sql_struct)
+    try:
+        _tgt_encode_sql = flatten_sql(_tgt_table['header'], _sql_struct)
+        print(_tgt_encode_sql)
+    except Exception as e:
+        print(src_map_to_tgt)
+        print(_tgt_table['header'])
+        print(_sql_struct)
+        raise e
     return _tgt_encode_sql
 
 
