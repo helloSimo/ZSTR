@@ -17,6 +17,8 @@ def train(args):
     epoch_list = [[40, 80], [120, 160]]
 
     for max_len in length_list:
+        if args.prefix != '':
+            args.prefix = args.prefix.format(max_len)
         for dataset in dataset_list:
             if dataset in ['WTQ', 'WSQL']:
                 epoch_idx = 0
