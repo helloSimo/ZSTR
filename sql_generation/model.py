@@ -5,6 +5,7 @@ import random
 from copy import deepcopy
 from typing import Dict, List
 from collections import defaultdict
+from tqdm import tqdm
 
 
 def flatten_sql(headers: List, _ex_sql_struct: List):
@@ -132,7 +133,8 @@ class Generator:
     def generate(self, tgt_tables: List[Dict], ques_per_passage: int = 1):
         qa_cnt = 0
         qas = []
-        for tgt_table in tgt_tables:
+        print("generate sql...")
+        for tgt_table in tqdm(tgt_tables, total=len(tgt_tables)):
             sql_cnt = 0
             while sql_cnt < ques_per_passage:
                 example = random.choice(self.examples)
