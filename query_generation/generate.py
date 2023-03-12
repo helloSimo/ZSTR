@@ -4,6 +4,8 @@ import random
 import jsonlines
 import argparse
 import collections
+
+import torch.cuda
 from tqdm import tqdm
 from rank_bm25 import BM25Okapi
 from transformers import AutoTokenizer, set_seed
@@ -75,7 +77,8 @@ def main(args):
                                              split='dev')
 
     # get generator
-    generator = QueryGenerator(model=QGenModel(args.model_name_or_path))
+    model = QGenModel(args.model_name_or_path)
+    generator = QueryGenerator(model=model)
 
     # get split qas
     train_qas = get_split_qas(generator=generator,
@@ -88,6 +91,9 @@ def main(args):
                             split_count=dev_count,
                             max_query_length=args.max_query_length,
                             batch_size=args.batch_size)
+    del model
+    del generator
+    torch.cuda.empty_cache()
 
     bm25 = BM25Okapi(corpus.values())
     ids = list(corpus.keys())
@@ -143,7 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')
 
     parser.add_argument('--model_name_or_path', type=str, default='BeIR/query-gen-msmarco-t5-base-v1')
-    parser.add_argument('--max_query_length', type=int, default=128)
+    parser.add_argument('--max_query_length', type=int, default=32)
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--seed', type=int, default=42)
 
