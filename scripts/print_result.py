@@ -27,7 +27,7 @@ def main(args):
             epoch = re.findall(pattern, line)[0]
             line = f.readline()
 
-            model_list.append((length_index, epoch_index, dataset_index, dir_name, epoch.strip(), line.strip()))
+            model_list.append((epoch_index, dataset_index, length_index, dir_name, epoch.strip(), line.strip()))
 
     model_list = sorted(model_list)
     for i in range(0, len(model_list), 4):
