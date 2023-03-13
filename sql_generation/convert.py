@@ -27,7 +27,7 @@ def convert_qa(qas: List[Dict],
         output = convertor.generate(input_ids=features['input_ids'].to(device),
                                     attention_mask=features['attention_mask'].to(device),
                                     max_new_tokens=32)
-        qa['question'] = tokenizer.decode(output[0])
+        qa['question'] = tokenizer.decode(output[0], skip_special_tokens=True)
 
 
 def main(args):
