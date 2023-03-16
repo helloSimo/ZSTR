@@ -56,11 +56,11 @@ def get_split_tables(tables, dataset, split):
     return split_tables, count
 
 
-def get_split_qas(generator, split_tables, split_count):
+def get_split_qas(generator, split_tables, target_count):
     split_qas = generator.generate(tgt_tables=split_tables,
-                                   ques_per_passage=math.ceil(split_count / len(split_tables)))
+                                   ques_per_passage=math.ceil(target_count / len(split_tables)))
     random.shuffle(split_qas)
-    while len(split_qas) > split_count:
+    while len(split_qas) > target_count:
         split_qas.pop()
     return split_qas
 
@@ -101,10 +101,10 @@ def main(args):
     # get split qas
     train_qas = get_split_qas(generator=generator,
                               split_tables=train_tables,
-                              split_count=train_count,)
+                              target_count=train_count*args.multiple)
     dev_qas = get_split_qas(generator=generator,
                             split_tables=dev_tables,
-                            split_count=dev_count)
+                            target_count=dev_count*args.multiple)
 
     bm25 = BM25Okapi(corpus.values())
     ids = list(corpus.keys())
@@ -160,6 +160,7 @@ if __name__ == "__main__":
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')
 
     parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--multiple', type=int, default=1)
 
     main_args = parser.parse_args()
 

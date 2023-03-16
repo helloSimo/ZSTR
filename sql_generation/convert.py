@@ -66,10 +66,10 @@ def main(args):
     # get split qas
     train_qas = get_split_qas(generator=generator,
                               split_tables=train_tables,
-                              split_count=train_count,)
+                              target_count=train_count*args.multiple)
     dev_qas = get_split_qas(generator=generator,
                             split_tables=dev_tables,
-                            split_count=dev_count)
+                            target_count=dev_count*args.multiple)
 
     # convert split qas
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -141,6 +141,7 @@ if __name__ == "__main__":
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')
 
     parser.add_argument('--model_name_or_path', type=str, default='mrm8488/t5-base-finetuned-wikiSQL-sql-to-en')
+    parser.add_argument('--multiple', type=int, default=1)
     parser.add_argument('--seed', type=int, default=42)
 
     main_args = parser.parse_args()

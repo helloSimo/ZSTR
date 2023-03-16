@@ -35,13 +35,13 @@ def get_split_corpus(corpus, dataset, split):
     return split_corpus, count
 
 
-def get_split_qas(generator, split_corpus, split_count, max_query_length, batch_size):
+def get_split_qas(generator, split_corpus, target_count, max_query_length, batch_size):
     split_qas = generator.generate(corpus=split_corpus,
                                    max_length=max_query_length,
-                                   ques_per_passage=math.ceil(split_count / len(split_corpus)),
+                                   ques_per_passage=math.ceil(target_count / len(split_corpus)),
                                    batch_size=batch_size)
     random.shuffle(split_qas)
-    while len(split_qas) > split_count:
+    while len(split_qas) > target_count:
         split_qas.pop()
     return split_qas
 
@@ -83,12 +83,12 @@ def main(args):
     # get split qas
     train_qas = get_split_qas(generator=generator,
                               split_corpus=train_corpus,
-                              split_count=train_count,
+                              target_count=train_count*args.multiple,
                               max_query_length=args.max_query_length,
                               batch_size=args.batch_size)
     dev_qas = get_split_qas(generator=generator,
                             split_corpus=dev_corpus,
-                            split_count=dev_count,
+                            target_count=dev_count*args.multiple,
                             max_query_length=args.max_query_length,
                             batch_size=args.batch_size)
     del model
@@ -150,6 +150,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--model_name_or_path', type=str, default='BeIR/query-gen-msmarco-t5-base-v1')
     parser.add_argument('--max_query_length', type=int, default=32)
+    parser.add_argument('--multiple', type=int, default=1)
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--seed', type=int, default=42)
 

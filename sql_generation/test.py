@@ -1,3 +1,4 @@
+import json
 import os
 import math
 import random
@@ -87,6 +88,12 @@ def main(args):
                                    ques_per_passage=math.ceil(train_count / len(train_tables)))
 
 
+def test():
+    data = json.load(open('squall/data.json'))
+    for example in data:
+        if example['tbl'] == '203_137':
+            print(example['sql'], end='\n\n')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -103,4 +110,5 @@ if __name__ == "__main__":
 
     main_args = parser.parse_args()
 
-    main(main_args)
+    #main(main_args)
+    test()
