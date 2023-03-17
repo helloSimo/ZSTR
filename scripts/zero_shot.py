@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('q_name', type=str)
     parser.add_argument('p_name', type=str)
-    parser.add_argument('device', type=int, choices=[0, 1, 2, 3])
+    parser.add_argument('device', type=int)
     main_args = parser.parse_args()
 
     eval_main(main_args)

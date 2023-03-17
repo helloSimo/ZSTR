@@ -39,7 +39,7 @@ def train(args):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--lr_name', type=str, choices=['2e5', '1e5', '5e6', '1e6'])
-    parser.add_argument('--device', type=int, choices=[0, 1, 2, 3])
+    parser.add_argument('--device', type=int)
     parser.add_argument('--prefix', type=str, default='')
     parser.add_argument('--length', type=int, choices=[0, 128, 256], default=0)
     parser.add_argument('--dataset', type=str, default='')
