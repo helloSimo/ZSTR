@@ -25,6 +25,7 @@ def train(args):
             else:
                 epoch_idx = 1
             for epoch_num in epoch_list[epoch_idx]:
+                epoch_num = int(epoch_num*args.epoch_scale)
                 try:
                     train_model(device=args.device,
                                 dataset=args.prefix + dataset,
@@ -43,6 +44,7 @@ if __name__ == "__main__":
     parser.add_argument('--prefix', type=str, default='')
     parser.add_argument('--length', type=int, choices=[0, 128, 256], default=0)
     parser.add_argument('--dataset', type=str, default='')
+    parser.add_argument('--epoch_scale', type=float, default=1)
     main_args = parser.parse_args()
 
     train(main_args)
