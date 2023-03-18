@@ -30,13 +30,13 @@ def main(args):
             model_list.append((epoch_index, dataset_index, length_index, dir_name, epoch.strip(), line.strip()))
 
     model_list = sorted(model_list)
-    for i in range(0, len(model_list), 4):
-        print(model_list[i + 0][-3], end='  ')
-        print(model_list[i + 1][-3], end='  ')
-        print(model_list[i + 2][-3], end='  ')
-        print(model_list[i + 3][-3])
-        print('/'.join([model_list[i][-2], model_list[i + 1][-2], model_list[i + 2][-2], model_list[i + 3][-2]]))
-        print('\t'.join([model_list[i][-1], model_list[i + 1][-1], model_list[i + 2][-1], model_list[i + 3][-1]]))
+    for i in range(0, len(model_list), args.num_per_row):
+        for j in range(args.num_per_row):
+            print(model_list[i + j][-3], end='  ')
+        print()
+        # print('/'.join([model_list[i][-2], model_list[i + 1][-2], model_list[i + 2][-2], model_list[i + 3][-2]]))
+        for j in range(args.num_per_row):
+            print(model_list[i + j][-1], end='\t')
         print('\n')
 
 
@@ -44,6 +44,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--lr_name', type=str)
     parser.add_argument('--prefix', type=str, default='')
+    parser.add_argument('--num_per_row', type=int, default=4)
     main_args = parser.parse_args()
 
     main(main_args)
