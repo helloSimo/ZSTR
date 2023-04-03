@@ -33,10 +33,11 @@ def process(src1, part1, src2, part2, tar):
 def main(args):
     random.seed(42)
 
-    src_formats = []
-    for length in [128, 256]:
-        for dataset in ['NQT', 'NQTt']:
-            src_formats.append('datasets/{}%d_%s_train' % (length, dataset))
+    # src_formats = []
+    # for length in [128, 256]:
+    #     for dataset in ['NQT', 'NQTt']:
+    #         src_formats.append('datasets/{}%d_%s_train' % (length, dataset))
+    src_formats = ['datasets/{}128_WSQL_train']
 
     for src_format in src_formats:
         process(src1=src_format.format(args.src1),
