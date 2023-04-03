@@ -18,7 +18,11 @@ def get_model_list(lr_name, prefix):
 
 
 def eval_main(args):
-    lr_name = args.lr_name
+    if args.lr_name == '':
+        lr_name = ['2e5', '1e5', '5e6', '1e6']
+    else:
+        lr_name = args.lr_name.split(' ')
+
     device = args.device
     prefix = args.prefix
 
@@ -33,7 +37,7 @@ def eval_main(args):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('--lr_name', type=str, choices=['2e5', '1e5', '5e6', '1e6'])
+    parser.add_argument('--lr_name', type=str, default='', choices=['', '2e5', '1e5', '5e6', '1e6'])
     parser.add_argument('--device', type=int)
     parser.add_argument('--prefix', type=str, default='')
     main_args = parser.parse_args()
