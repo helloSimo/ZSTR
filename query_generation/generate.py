@@ -138,7 +138,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='WTQ', choices=['WTQ', 'WikiSQL', 'NQTables'])
+    parser.add_argument('--dataset', type=str, default='WTQ')
     parser.add_argument('--output_dir', type=str, default=None)
     parser.add_argument('--train_negative_num', type=int, default=8)
     parser.add_argument('--dev_negative_num', type=int, default=8)
