@@ -17,7 +17,7 @@ def main(args):
         name_list = dir_name.split('_')
         dataset_index = dataset_dict[name_list[-4].strip()]
         length_index = length_dict[name_list[-3].strip()]
-        # epoch_index = epoch_dict[name_list[-1].strip()]
+        epoch_index = epoch_dict[name_list[-1].strip()]
 
         with open(os.path.join(dir_name, 'result.txt')) as f:
             line = f.readline()
@@ -27,7 +27,7 @@ def main(args):
             epoch = re.findall(pattern, line)[0]
             line = f.readline()
 
-            model_list.append((dataset_index, length_index, dir_name, epoch.strip(), line.strip()))
+            model_list.append((epoch_index, length_index, dir_name, epoch.strip(), line.strip()))
 
     model_list = sorted(model_list)
     for i in range(0, len(model_list), args.num_per_row):
