@@ -32,6 +32,8 @@ def compute_metrics(eval_prediction):
 
 
 def main():
+    os.environ['WANDB_DISABLED'] = 'true'
+
     parser = HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     model_args: ModelArguments
