@@ -65,8 +65,7 @@ def eval_model(model_name, device):
                       "--per_device_eval_batch_size 1024 " \
                       "--p_max_len {2} " \
                       "--encode_in_path datasets/{3}_eval/corpus.jsonl " \
-                      "--encoded_save_path {0}/corpus_emb.pkl " \
-                      "--dpr"
+                      "--encoded_save_path {0}/corpus_emb.pkl "
     encode_format_2 = "CUDA_VISIBLE_DEVICES={3} python encode.py " \
                       "--output_dir temp_out " \
                       "--model_name_or_path {0}/checkpoint-{1} " \
@@ -74,8 +73,7 @@ def eval_model(model_name, device):
                       "--q_max_len 32 " \
                       "--encode_in_path datasets/{2}_eval/test.jsonl " \
                       "--encoded_save_path {0}/test_emb.pkl " \
-                      "--encode_is_qry " \
-                      "--dpr"
+                      "--encode_is_qry "
     retrieve_format = "python retrieve.py " \
                       "--query_reps {0}/test_emb.pkl " \
                       "--passage_reps {0}/corpus_emb.pkl " \

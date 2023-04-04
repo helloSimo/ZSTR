@@ -10,8 +10,10 @@ def get_model_list(lr_name, prefix):
     for dir_name in glob('model_dpr_{}*{}*'.format(prefix, lr_name)):
         if prefix == "" and len(dir_name.split('_')) == 7:
             continue
-        if os.path.exists(os.path.join(dir_name, 'setting.txt')) and \
-                not os.path.exists(os.path.join(dir_name, 'result.txt')):
+        # if os.path.exists(os.path.join(dir_name, 'setting.txt')) and \
+        #         not os.path.exists(os.path.join(dir_name, 'result.txt')):
+        #     model_list.append(dir_name)
+        if not os.path.exists(os.path.join(dir_name, 'result.txt')):
             model_list.append(dir_name)
 
     return sorted(model_list)
@@ -26,7 +28,13 @@ def eval_main(args):
     device = args.device
     prefix = args.prefix
 
-    for model_name in get_model_list(lr_name, prefix):
+    model_name_list = get_model_list(lr_name, prefix)
+    for model_name in model_name_list:
+        print(model_name)
+    if input('Continue? (y/n)') != 'y':
+        exit(0)
+
+    for model_name in model_name_list:
         try:
             eval_model(model_name, device)
         except Exception as e:
