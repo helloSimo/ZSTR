@@ -14,7 +14,7 @@ def train_model(device, dataset, max_len, lr_name, epoch_num):
                    "--gradient_accumulation_steps 1  --warmup_ratio  0.1 --fp16 --dpr " \
                    "--logging_first_step  --logging_strategy  epoch  --save_strategy  epoch " \
                    "--save_total_limit 4  --early_stop 0  --dataloader_num_workers 2 " \
-                   "--load_best_model_at_end  --metric_for_best_model eval_acc " \
+                   "--metric_for_best_model eval_acc " \
                    "--train_negative_num 1  --dev_negative_num 8 --q_max_len 32 " \
                    "--train_dir datasets/{1}_train " \
                    "--output_dir model_dpr_{1}_{2}_{3}_{5} " \
@@ -31,7 +31,7 @@ def train_model(device, dataset, max_len, lr_name, epoch_num):
             os.system('rm -rf {}'.format(model_name))
 
     lr = lr_name.replace('e', 'e-')
-    delay_num = epoch_num-40 if epoch_num > 40 else 20
+    delay_num = epoch_num//2
     shell = shell_format.format(device, dataset, max_len, lr_name, lr, epoch_num, delay_num)
     os.system(shell)
 
