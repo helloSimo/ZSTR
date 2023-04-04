@@ -17,13 +17,13 @@ def flatten_sql(headers: List, _ex_sql_struct: List):
         # extra column, which we do not need in result
         if keyword == "w" or keyword == "from":
             continue
-        if re.fullmatch(r"c\d+(_.+)?", keyword):
-            # only take the first part
+        if re.fullmatch(r"c\d+(_.+)?", keyword) and keyword_type == "Column":
             index_key = int(keyword.split("_")[0][1:]) - 1
             keyword = headers[index_key]
 
         if keyword_type in ["Column", "Literal.String", "Literal.Number"] \
                 and ' ' in keyword:
+            # add quotes for text with spaces
             keyword = "'{}'".format(keyword)
         _encode_sql.append(keyword)
 
@@ -134,7 +134,9 @@ class Generator:
         qa_cnt = 0
         qas = []
         print("generate sql...")
-        for tgt_table in tqdm(tgt_tables, total=len(tgt_tables)):
+        for i, tgt_table in tqdm(enumerate(tgt_tables), total=len(tgt_tables)):
+            if i < 75600:
+                continue
             sql_cnt = 0
             while sql_cnt < ques_per_passage:
                 example = random.choice(self.examples)

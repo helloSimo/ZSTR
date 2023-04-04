@@ -24,7 +24,7 @@ def get_corpus(dataset, processor):
 
 
 def get_split_tables(tables, dataset, split):
-    pattern1 = re.compile(r'\d+(?:[.,]\d+)*\s*[kmdcg]?[m²³lgbhsd℃jwa]?mile?bit?hour?min?cal?ah?$',
+    pattern1 = re.compile(r'^\d+(?:[.,]\d+)*\s*[kmdcg]?[m²³lgbhsd℃jwa]?mile?bit?hour?min?cal?ah?$',
                           re.IGNORECASE)
     pattern2 = re.compile(r'^\d+(\s*[/\\\-_:.]+\s*\d+)+$', re.IGNORECASE)
     pattern3 = re.compile(r'^\(\s*\d+(?:[.,]\d+)*\s*\)$')
