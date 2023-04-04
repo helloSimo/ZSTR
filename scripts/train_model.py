@@ -2,12 +2,15 @@ import os
 from argparse import ArgumentParser
 
 
+def name_model(device, dataset, max_len, lr_name, epoch_num):
+    return "model_dpr_{}_{}_{}_{}".format(dataset, max_len, lr_name, epoch_num)
+
+
 def train_model(device, dataset, max_len, lr_name, epoch_num):
     shell_format = "CUDA_VISIBLE_DEVICES={0} python train.py " \
-                   "--untie_encoder --do_train  --do_eval  --evaluation_strategy epoch " \
-                   "--model_name_or_path vblagoje/dpr-question_encoder-single-lfqa-wiki " \
-                   "--additional_model_name vblagoje/dpr-ctx_encoder-single-lfqa-wiki " \
-                   "--per_device_train_batch_size 64  --per_device_eval_batch_size 256 " \
+                   "--do_train  --do_eval  --evaluation_strategy epoch " \
+                   "--model_name_or_path Luyu/co-condenser-wiki " \
+                   "--per_device_train_batch_size 256  --per_device_eval_batch_size 256 " \
                    "--gradient_accumulation_steps 1  --warmup_ratio  0.1 --fp16 --dpr " \
                    "--logging_first_step  --logging_strategy  epoch  --save_strategy  epoch " \
                    "--save_total_limit 4  --early_stop 0  --dataloader_num_workers 2 " \
@@ -35,7 +38,7 @@ def train_model(device, dataset, max_len, lr_name, epoch_num):
 
 def train(args):
     if args.dataset in ['WTQ', 'WSQL']:
-        assert args.epoch_num in [40, 80]
+        assert args.epoch_num in [20, 40]
     else:
         assert args.epoch_num in [120, 160]
 
