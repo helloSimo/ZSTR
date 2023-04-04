@@ -134,9 +134,7 @@ class Generator:
         qa_cnt = 0
         qas = []
         print("generate sql...")
-        for i, tgt_table in tqdm(enumerate(tgt_tables), total=len(tgt_tables)):
-            if i < 75600:
-                continue
+        for tgt_table in tqdm(tgt_tables, total=len(tgt_tables)):
             sql_cnt = 0
             while sql_cnt < ques_per_passage:
                 example = random.choice(self.examples)
