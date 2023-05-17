@@ -44,7 +44,7 @@ def main(args):
     # process table corpus
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path)
     processor = get_processor(max_cell_length=args.max_cell_length,
-                              max_input_length=args.max_input_length,
+                              max_input_length=256,
                               tokenizer=tokenizer,
                               include_title=args.title,
                               index_row=args.delimiter,
@@ -135,7 +135,6 @@ if __name__ == "__main__":
     parser.add_argument('--train_negative_num', type=int, default=8)
     parser.add_argument('--dev_negative_num', type=int, default=8)
     parser.add_argument('--max_cell_length', type=int, default=8)
-    parser.add_argument('--max_input_length', type=int, default=128, choices=[128, 256])
     parser.add_argument('--delimiter', action='store_true')
     parser.add_argument('--title', action='store_true')
     parser.add_argument('--tokenizer_name_or_path', type=str, default='bert-base-uncased')

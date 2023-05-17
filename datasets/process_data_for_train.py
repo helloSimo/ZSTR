@@ -29,7 +29,7 @@ def main(args):
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name_or_path)
     processor = get_processor(max_cell_length=args.max_cell_length,
-                              max_input_length=512,
+                              max_input_length=256,
                               tokenizer=tokenizer,
                               include_title=args.title,
                               index_row=args.delimiter,
