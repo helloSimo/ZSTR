@@ -41,8 +41,13 @@ def get_best_ckpt(model_name, print_result=True):
             lines.append(line)
 
             rs = []
-            for result in line.split('\t'):
-                rs.append(float(result))
+            try:
+                for result in line.split('\t'):
+                    rs.append(float(result))
+            except ValueError:
+                if result.startswith('best epoch'):
+                    print('already got best epoch')
+                    return None, None
             results.append((i, (sum(rs[1:4]), sum(rs))))
 
     max_id = max(results, key=lambda x: x[1])[0]
@@ -58,7 +63,7 @@ def get_best_ckpt(model_name, print_result=True):
     return epoch_list[max_id], lines[max_id]
 
 
-def eval_model(model_name, device):
+def eval_model(model_name, device, dpr):
     encode_format_1 = "CUDA_VISIBLE_DEVICES={4} python encode.py " \
                       "--output_dir temp_out " \
                       "--model_name_or_path {0}/checkpoint-{1} " \
@@ -85,6 +90,12 @@ def eval_model(model_name, device):
                   "--label_path datasets/{0}_eval/label.jsonl " \
                   "--rank_path {1}/test_rank.csv " \
                   "--result_txt"
+    if dpr:
+        encode_format_1 += "--dpr "
+        encode_format_2 += "--dpr "
+
+    if os.path.exists(os.path.join(model_name, 'result.txt')):
+        return
 
     param_list = model_name.split('_')
     dataset_name = param_list[-4]
@@ -101,14 +112,15 @@ def eval_main(args):
     model_name = args.model_name
     device = args.device
 
-    eval_model(model_name, device)
+    eval_model(model_name, device, args.dpr)
     get_best_ckpt(model_name)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('model_name', type=str)
-    parser.add_argument('device', type=int)
+    parser.add_argument('--model_name', type=str)
+    parser.add_argument('--device', type=int)
+    parser.add_argument('--dpr', action='store_true')
     main_args = parser.parse_args()
 
     eval_main(main_args)

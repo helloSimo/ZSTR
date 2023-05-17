@@ -36,7 +36,7 @@ def eval_main(args):
 
     for model_name in model_name_list:
         try:
-            eval_model(model_name, device)
+            eval_model(model_name, device, args.dpr)
         except Exception as e:
             print(e)
             exit(-1)
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr_name', type=str, default='', choices=['', '2e5', '1e5', '5e6', '1e6'])
     parser.add_argument('--device', type=int)
     parser.add_argument('--prefix', type=str, default='')
+    parser.add_argument('--dpr', action='store_true')
     main_args = parser.parse_args()
 
     eval_main(main_args)
